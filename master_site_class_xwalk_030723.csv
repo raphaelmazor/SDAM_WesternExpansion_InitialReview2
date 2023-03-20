@@ -132,51 +132,51 @@ CAAW0473,E,AW,West,Q&D review of logger data
 CAAW9243,I,AW,West,Short record but sufficient for determining intermittency
 CAAW9247,P,AW,West,Q&D Review of logger data; short record but site is well known
 CAAW9248,E,AW,West,Q&D review of logger data. Longest wet is 24 days
-CAWM0477,I,AW,West,
-CAWM0478,I,AW,West,
-CAWM0485,P,AW,West,
-CAWM0495,P,AW,West,
-CAWM0507,P,AW,West,
-CAWM0519,P,AW,West,
-CAWM0522,I,AW,West,Q&D review of logger data
-CAWM0523,I,AW,West,Q&D review of logger data
-CAWM0525,E,AW,West,Q&D review of logger data (incomplete)
-CAWM0528,I,AW,West,
-CAWM0549,I,AW,West,
-CAWM0566,P,AW,West,
-CAWM0588,I,AW,West,
-CAWM0592,I,AW,West,
-CAWM0595,I,AW,West,
-CAWM0598,P,AW,West,
-CAWM0609,P,AW,West,
-CAWM0610,P,AW,West,
-CAWM0621,I,AW,West,
-CAWM0652,P,AW,West,
-CAWM0657,I,AW,West,
-CAWM0672,I,AW,West,
-CAWM0684,I,AW,West,
-CAWM0697,I,AW,West,
-CAWM0718,P,AW,West,
-CAWM0720,P,AW,West,
-CAWM0724,P,AW,West,
-CAWM0736,I,AW,West,
-CAWM1822,I,AW,West,
-CAWM1831,I,AW,West,
-CAWM1837,U,AW,West,No logger data available
-CAWM1871,E,AW,West,
-CAWM1882,I,AW,West,
-CAWM1891,E,AW,West,
-CAWM1892,E,AW,West,
-CAWM1894,E,AW,West,
-CAWM1895,E,AW,West,
-CAWM1898,E,AW,West,
-CAWM1899,E,AW,West,
-CAWM1900,E,AW,West,
-CAWM1902,E,AW,West,
-CAWM9002,U,AW,West,"Need more logger data. Dry periods evident, but does not match across loggers, nor match field observations. Could be I or P"
-CAWM9005,U,AW,West,Likely E but record is too short
-CAWM9007,U,AW,West,Record too short.
-CAWM9008,U,AW,West,Possibly E but record too short
+CAWM0477,I,WM,West,
+CAWM0478,I,WM,West,
+CAWM0485,P,WM,West,
+CAWM0495,P,WM,West,
+CAWM0507,P,WM,West,
+CAWM0519,P,WM,West,
+CAWM0522,I,WM,West,Q&D review of logger data
+CAWM0523,I,WM,West,Q&D review of logger data
+CAWM0525,E,WM,West,Q&D review of logger data (incomplete)
+CAWM0528,I,WM,West,
+CAWM0549,I,WM,West,
+CAWM0566,P,WM,West,
+CAWM0588,I,WM,West,
+CAWM0592,I,WM,West,
+CAWM0595,I,WM,West,
+CAWM0598,P,WM,West,
+CAWM0609,P,WM,West,
+CAWM0610,P,WM,West,
+CAWM0621,I,WM,West,
+CAWM0652,P,WM,West,
+CAWM0657,I,WM,West,
+CAWM0672,I,WM,West,
+CAWM0684,I,WM,West,
+CAWM0697,I,WM,West,
+CAWM0718,P,WM,West,
+CAWM0720,P,WM,West,
+CAWM0724,P,WM,West,
+CAWM0736,I,WM,West,
+CAWM1822,I,WM,West,
+CAWM1831,I,WM,West,
+CAWM1837,U,WM,West,No logger data available
+CAWM1871,E,WM,West,
+CAWM1882,I,WM,West,
+CAWM1891,E,WM,West,
+CAWM1892,E,WM,West,
+CAWM1894,E,WM,West,
+CAWM1895,E,WM,West,
+CAWM1898,E,WM,West,
+CAWM1899,E,WM,West,
+CAWM1900,E,WM,West,
+CAWM1902,E,WM,West,
+CAWM9002,U,WM,West,"Need more logger data. Dry periods evident, but does not match across loggers, nor match field observations. Could be I or P"
+CAWM9005,U,WM,West,Likely E but record is too short
+CAWM9007,U,WM,West,Record too short.
+CAWM9008,U,WM,West,Possibly E but record too short
 COAW0746,E,AW,West,
 COAW0751,I,AW,West,
 COAW0755,I,AW,West,Q&D Interpretation of logger data
