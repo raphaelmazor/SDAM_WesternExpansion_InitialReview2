@@ -254,7 +254,10 @@ main_df %>%
          NoDens = NoUDens+NoMDens+NoDDens) %>%
   filter(NoDens==12)
 
-
+main_df %>%
+  filter(SiteCode=="COAW9111") %>%
+  select(CollectionDate, Lat_field, Long_field) %>% as.data.frame() %>% unique() %>%
+  arrange(CollectionDate)
 
 main_df %>%
   filter(CollectionDate < "2000-01-01") %>%

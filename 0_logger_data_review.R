@@ -213,7 +213,7 @@ logger_cal<-read_csv("https://sdamchecker.sccwrp.org/checker/download/calibratio
 logger_cal %>% group_by(serialnumber) %>% tally() %>% filter(n>1) #Verify that no pendant ID shows up more than once
 
 #Pick a site of interest
-my_site<-"WYWM9154"
+my_site<-"TXAW9255"
 
 #Get logger metadata
 my_logger_metadata<-main_df %>%
@@ -251,6 +251,13 @@ my_logger_metadata %>% select(contains("pendant"))
 main_df %>% 
   filter(SiteCode == my_site) %>%
   select(Database, CollectionDate, WaterInChannel_score, WaterInChannel_notes, SurfaceFlow_pct, SurfaceSubsurfaceFlow_pct, IsolatedPools_number)
+main_df %>% 
+  filter(SiteCode == my_site) %>%
+  select(Database, CollectionDate, Lat_field, Long_field) %>% as.data.frame()
+
+main_df %>% 
+  filter(SiteCode == my_site) %>%
+  select(Database, CollectionDate, Lat_field, Long_field) %>% as.data.frame()
 
 #Download all logger data for the site
 my_logger_metadata$SiteName
@@ -317,6 +324,8 @@ ggplot(data=my_logger_df2, aes(x=datetime, y=intensity))+
   scale_y_sqrt()+
   # scale_y_log10()+
   facet_wrap(~LoggerLocation, ncol=1)
+  # facet_grid(PendantID~LoggerLocation)
+  # facet_wrap(~PendantID, ncol=1)
 
 my_logger_metadata$SiteName
 my_logger_metadata %>% select(LoggerLocation, Lat_field, Long_field,CollectionDate,hydro_conditions, SurfaceFlow_pct, WaterInChannel_score, WaterInChannel_notes) %>% 
@@ -370,20 +379,46 @@ ggplot(data=my_logger_df3, aes(x=datetime, y=value))+
                unique(),
              aes(yintercept=cutoff), color="blue", linetype="dotted")+
   geom_vline(data=my_logger_metadata, aes(xintercept=CollectionDate), color="orange")+
+  scale_shape_discrete(name="PendantID")+
   ggtitle(my_site)+
   facet_grid(name~LoggerLocation, scales="free_y")#+
 
-
+my_logger_df3 %>%
+  filter(
+    datetime >= "2022-10-05 00:00:01" &
+      datetime <= "2022-10-05 23:59:59" 
+  ) %>% filter(LoggerLocation=="L1") %>%
+  summary()
+  ggplot( aes(x=datetime, y=value))+
+  geom_point(aes(color=Wet, shape=PendantID %>% as.character()))+
+  geom_path(aes(group=PendantID %>% as.character()))+
+  geom_hline(data= . %>%
+               select(LoggerLocation, cutoff, name) %>%
+               # filter(name=="intensity") %>%
+               unique(),
+             aes(yintercept=cutoff), color="blue", linetype="dotted")+
+  geom_vline(data=my_logger_metadata, aes(xintercept=CollectionDate), color="orange")+
+  scale_shape_discrete(name="PendantID")+
+  ggtitle(my_site)+
+  facet_grid(name~LoggerLocation, scales="free_y")
+  
 
 # # xlim(as_datetime("2021-12-01 01:00:00"),
 # as_datetime("2022-12-31 23:00:00"))
+  
+  main_df %>% 
+    left_join(western_sites_classes) %>%
+    group_by(Class, SiteCode) %>% 
+    tally() %>%
+    ggplot()+geom_histogram(aes(x=n, fill=Class))+
+    scale_x_binned()
 
 ########USGS Gage Data########
 
 library(dataRetrieval) #USGS data retrieval package
 # mysite<-"CAAW0260"
 my_logger_metadata$SiteName
-mygaugeid<-"06622700"
+mygaugeid<-"08281400"
 gauge_name<- readNWISsite(mygaugeid)$station_nm
 gauge_name
 parameterCd <- "00060" #This is the parameter code for discharge
