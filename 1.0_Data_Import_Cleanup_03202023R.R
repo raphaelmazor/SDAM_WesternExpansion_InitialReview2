@@ -1,40 +1,20 @@
 library(tidyverse)
-library(sf)
+library(data.table)
+library(lubridate)
 library(skimr)
 
-western_sites_classes<-read_csv("master_site_class_xwalk_030723.csv") %>%
-  filter(Region=="West") %>%
-  mutate(State=str_sub(SiteCode, 1,2))
-western_sites_classes$Class<-factor(western_sites_classes$Class, levels=c("P","I","E","U"))
+##### METHOD DEVELOPMENT SITES - Read in site data for methods development sites ####
 
-western_sites_classes %>%
-  group_by(Region_detail, Class) %>%
-  tally() %>%
-  pivot_wider(names_from=Region_detail, values_from = n)
-
-western_sf<-st_read("NotForGit/shapefiles/")
-western_sf$Stratum.f<-factor(western_sf$Stratum, levels=c("CA","AZ","NV","NM-TX","CO-WY-UT-MT",
-                                                          "Northern Rockies","Central Rockies","Southern Rockies", "CA-NV"))
-
-
-library(RColorBrewer)
-mypal<-c("#fee391","#fec44f","#fe9929","#d95f0e","#993404",
-                  "#d0d1e6","#74a9cf","#2b8cbe","#045a8d" )
-                  
-
-regional_map<-ggplot()+
-  geom_sf(data=western_sf, aes(fill=Stratum.f))+
-  scale_fill_manual(values=mypal)
-
-
-#####
+#Identify WESTERN databases
 myDBs<-c("WMBR_1_1","WEx_SDAM_0","WMBR_2","WMV_1","FD003","FD004") 
 
 #### MAIN - Read in main site data table and filter for GP sites ####
 junk<- read_csv("https://sdamchecker.sccwrp.org/checker/download/main-all")# %>%
 junk_west<-junk %>% filter(origin_database %in% myDBs) 
 junk_east<-junk %>% filter(origin_database %in% c("NESE Baseline Revisits v2", "NESE Baseline v1", "NESE Validation v1"))
-main_df<-junk %>% # read_csv("https://sdamchecker.sccwrp.org/checker/download/main-all") %>%
+junk_gp<-junk %>% filter(origin_database %in% c("Great Plains Baseline Revisits v2_1_October","Great Plains SDAM v3","Great Plains Validation_v2")) #Missing GP revisits v3
+
+main_df<- junk %>%
   filter(origin_database %in% myDBs) %>%
   transmute( # Align column names to original metric calculator script naming
     Download_date = Sys.time(),
@@ -228,115 +208,165 @@ main_df<-junk %>% # read_csv("https://sdamchecker.sccwrp.org/checker/download/ma
                           "COAW0781",
                           "CAAW0247")) 
 
-main_df %>%
-  filter(is.na(Slope)) %>%
-  select(Database, SiteCode, CollectionDate)
-main_df %>%
-  filter(SiteCode=="WYWM1535") %>%
-  select(Database, SiteCode, CollectionDate, Slope) %>%
-  arrange(CollectionDate)
-
-skim_without_charts(main_df)
-main_df %>%
-  filter(is.na( Bankwidth_0)) %>%
-  select(Database, SiteCode, CollectionDate, Lat_field, Long_field) %>%
-  arrange(Database, SiteCode, CollectionDate)
-
-main_df %>%
-  filter(SiteCode=="NVAW1212") %>%
-  select(Database, SiteCode, CollectionDate, starts_with("bank")) %>%
-  arrange(Database, SiteCode, CollectionDate)
-
-main_df %>%
-  mutate(NoUDens = is.na(dens_UU) + is.na(dens_UL) + is.na(dens_UR) + is.na(dens_UD),
-         NoMDens = is.na(dens_MU) + is.na(dens_ML) + is.na(dens_MR) + is.na(dens_MD),
-         NoDDens = is.na(dens_DU) + is.na(dens_DL) + is.na(dens_DR) + is.na(dens_DD),
-         NoDens = NoUDens+NoMDens+NoDDens) %>%
-  filter(NoDens==12)
 
 
 
-main_df %>%
-  filter(CollectionDate < "2000-01-01") %>%
-  as.data.frame()
-# ChannelDimensions_score= `Floodplain and channel dimensions score (0-3)`,
 
-western_sites_classes_sf<-western_sites_classes %>%
-  inner_join(main_df %>%
-               select(SiteCode, Lat_field, Long_field) %>%
-               group_by(SiteCode) %>%
-               slice_sample(n=1) %>%
-               ungroup() %>% 
-               na.omit()
-  ) %>%
-  mutate(Long_field=case_when(Long_field>0~ (-1*Long_field), 
-                              SiteCode=="CAWM0621"~ -120.7775,
-                              T~Long_field),
-         Lat_field = case_when(SiteCode=="CAWM0621"~38.7833, T~Lat_field)) %>%
-  st_as_sf(coords=c("Long_field","Lat_field"),
-           crs=4326, remove = F)
-regional_map +
-  geom_sf(data=western_sites_classes_sf)+
-  facet_grid(Region_detail~Class)+
-  theme_bw()+
-  theme(panel.grid = element_blank(),
-        axis.text = element_blank(),
-        axis.ticks = element_blank(),
-        legend.position="none")
+###############################################
 
-regional_map +
-  geom_sf(data=western_sites_classes_sf, aes(shape=Class))+
-  theme_bw()+
-  theme(panel.grid = element_blank(),
-        axis.text = element_blank(),
-        axis.ticks = element_blank())
+# More fixes for main dataset
+main_combined <- main_df %>%
+  mutate(
+    Slope = case_when( #These samples are missing slope. Replace with mean from other visits
+      ParentGlobalID == "fe4ad980-1c2f-4aba-94a5-aed695182b42" ~ 10, # Replace with 10; same value recorded for other two samples; NYNE9549_B
+      ParentGlobalID == "930118c4-e434-4dfa-ad69-169b42965184" ~ 1,# Replace with 1; same value recorded for other two samples; NYNE9030_B
+      #ParentGlobalID == "19652a45-8c2a-4f8c-a8db-351c69f0d016" ~ ?, # No other samples for this validation site. NYNE4129_V - 2021-05-26
+      ParentGlobalID == "ba3b1308-4d70-4e0b-bc76-cb2619a90ec0" ~ (1+2)/2,# Replace with average of other two samples; FLSE9524_B
+      ParentGlobalID == "d9e9fbc3-298a-44ba-b70e-80effc6d49f5" ~ 2,# Replace with average of other two samples; FLSE9523_B
+      ParentGlobalID == "e945ad5e-aa36-49de-af18-76fae6c7845e" ~ (3+2)/2,# Replace with average of other two samples; FLSE9508_B 
+      #ParentGlobalID == "1b890a44-be00-49cb-b7ac-bbfc6f15fb59" ~ ?, # No other samples for this validation site. ARNE125_V - 2021-06-30
+      T ~ Slope   ),
+    SeepsSprings_yn = case_when(
+      SeepsSprings_yn == "notdectected" ~ "notdetected", #misspelling
+      is.na(SeepsSprings_yn) ~ "notdetected", #Assume not detected if not reported
+      SeepsSprings_yn == "na" ~ "notdetected", #Assume not detected if not reported 
+      ParentGlobalID == "e945ad5e-aa36-49de-af18-76fae6c7845e" ~ "notdetected", # Missing for one sample - FLSE9508_B, 10/19/2021, revisits v2
+      T~SeepsSprings_yn),
+    SeepsSprings_inchannel = case_when(
+      SeepsSprings_yn == "notdetected" ~ "no",
+      is.na(SeepsSprings_inchannel) ~ "no",
+      SeepsSprings_inchannel=="na"~"no",
+      T~SeepsSprings_inchannel),
+    Landuse = case_when(
+      ParentGlobalID == "3bd11db2-be7a-4c8d-8002-6f0d63ab82b5" ~ "forested", # VANE8897_B, 2020-11-19 - all other samples say forested landuse
+      T~ Landuse),
+    HydricSoils_score = case_when(
+      ParentGlobalID == "6c0625a5-e3b0-4fb5-8dca-1caaea8866aa" ~ NA_character_, # FLSE9551_B, 10/17/2021 - no notes or anything, see what field crews say
+      T~ HydricSoils_score),
+    HydricSoils_locations = case_when(
+      HydricSoils_score == "not_assessed" ~ 0,
+      T ~ HydricSoils_locations),
+    #dens_UD = case_when(
+    # ParentGlobalID == "f1605b27-9b15-4d78-800f-69bc04ec9c6b" ~ 17, # MENE4957_V, 12/15/2021 - all other densiometer measurments were 17 for this sample 
+    #T~dens_UD),
+    #SubstrateSorting_score = case_when(
+    # ParentGlobalID == "" ~ , #
+    #T~SubstrateSorting_score),
+    #RifflePoolSeq_score = case_when(
+    # ParentGlobalID == "" ~ , #
+    #ParentGlobalID == "" ~ , #
+    #T~RifflePoolSeq_score),
+    #SedimentOnPlantsDebris_score = case_when(
+    # ParentGlobalID == "" ~ ,#
+    #ParentGlobalID == "" ~ , #
+    #T~SedimentOnPlantsDebris_score),
+    WoodyJams_number = case_when(
+      is.na(WoodyJams_number) ==T ~ 0, # Replace missing (29 samples) wood jam count with zero
+      T~WoodyJams_number)#,
+    #ODL_score = case_when(
+    # ParentGlobalID == "b0e96530-75a0-46d8-b6c1-00472781558a" ~ NA_real_, #SCSE8343_B, 2020-12-14 - No information about why it's missing
+    #ParentGlobalID = "938c28ad-6ae2-475d-ba7f-01cee11116e2" ~ 0.5, # TNNE8765_B, 2021-04-04 - "0.5" present in the notes column, but this might just be duplicated from the next field over
+    #ParentGlobalID = "6c0625a5-e3b0-4fb5-8dca-1caaea8866aa" ~ NA_real_, #FLSE9551_B, 2021-10-17 - No information available 
+    #T ~ ODL_score),
+    #LeafLitter_score = case_when(
+    # ParentGlobalID == "" ~ , #
+    #ParentGlobalID == "" ~ , #
+    #T~ LeafLitter_score),
+    #baseflowscore = case_when(
+    # ParentGlobalID == "" ~ , #
+    #T~ baseflowscore),
+    #MaxPoolDepth = case_when(
+    # ParentGlobalID == "" ~ , #
+    #ParentGlobalID == "" ~ , #
+    #ParentGlobalID == "" ~ , #
+    #ParentGlobalID == "" ~ , #
+    #T~MaxPoolDepth),
+    #ReachLength_actual = case_when(
+    # ParentGlobalID == "" ~ , #
+    #T~ReachLength_actual),
+    #Bankwidth_0 = case_when(
+    # ParentGlobalID == "" ~ , #
+    #T~ Bankwidth_0),
+    #Bankwidth_15 = case_when(
+    # ParentGlobalID == "" ~ , #
+    #T~ Bankwidth_15),
+    #Bankwidth_30 = case_when(
+    # ParentGlobalID == "" ~ , #
+    #T~ Bankwidth_30)
+  )
 
 
-main_df %>%
-  filter(Database =="WEx_SDAM_0" & str_detect(SiteCode,"CA")) %>%
-  select(SiteCode, CollectionDate) %>%
-  group_by(SiteCode) %>%
-  tally()
-mutate(VisitNo = rank(CollectionDate)) %>%
-  ungroup() %>%
-  mutate(VisitNo = paste0("VisitNo",VisitNo),
-         CollectionDate=as.Date(CollectionDate)) %>%
-  # pivot_wider(names_from = VisitNo, values_from = CollectionDate)
-  
-  write.table(file="clipboard",sep="\t", row.names=F)
+#Missing entrenchment ratios estimated by examination of photos and consultation of field crews. Did not update Survey123 data.
+#GASE9180_B
+main_combined$ChannelDimensions_score[main_combined$ParentGlobalID=="751abafb-e40b-46c9-a336-56c69d2690e2"]<-3
+main_combined$ChannelDimensions_method[main_combined$ParentGlobalID=="751abafb-e40b-46c9-a336-56c69d2690e2"]<-"Estimated from photos, other visits"
+main_combined$fp_entrenchmentratio_mean[main_combined$ParentGlobalID=="751abafb-e40b-46c9-a336-56c69d2690e2"]<-2.5
+#MDNE3514_B
+main_combined$ChannelDimensions_score[main_combined$ParentGlobalID=="2f2cabe0-5bcc-483e-bd3e-ca44dce42cfc"]<-1.5
+main_combined$ChannelDimensions_method[main_combined$ParentGlobalID=="2f2cabe0-5bcc-483e-bd3e-ca44dce42cfc"]<-"Estimated from photos, other visits"
+main_combined$fp_entrenchmentratio_mean[main_combined$ParentGlobalID=="2f2cabe0-5bcc-483e-bd3e-ca44dce42cfc"]<-2
+#NCSE9079_B
+main_combined$ChannelDimensions_score[main_combined$ParentGlobalID=="3b4334ca-bf77-4545-922d-116da75e3e0b"]<-1.5
+main_combined$ChannelDimensions_method[main_combined$ParentGlobalID=="3b4334ca-bf77-4545-922d-116da75e3e0b"]<-"Estimated from photos, other visits, and consultation with field crew"
+main_combined$fp_entrenchmentratio_mean[main_combined$ParentGlobalID=="3b4334ca-bf77-4545-922d-116da75e3e0b"]<-2
+#NHNE8905_V
+main_combined$ChannelDimensions_score[main_combined$ParentGlobalID=="4f667856-c8d1-4ea3-aef2-7d79c8ef91a4"]<-3
+main_combined$ChannelDimensions_method[main_combined$ParentGlobalID=="4f667856-c8d1-4ea3-aef2-7d79c8ef91a4"]<-"Estimated from photos and consultation with field crew"
+main_combined$fp_entrenchmentratio_mean[main_combined$ParentGlobalID=="4f667856-c8d1-4ea3-aef2-7d79c8ef91a4"]<-2.5
+#OHNE8437_B
+main_combined$ChannelDimensions_score[main_combined$ParentGlobalID=="{9F61EDAB-4D5C-40D0-8382-EF39C19D1310}"]<-1.5
+main_combined$ChannelDimensions_method[main_combined$ParentGlobalID=="{9F61EDAB-4D5C-40D0-8382-EF39C19D1310}"]<-"Estimated from photos, other visits"
+main_combined$fp_entrenchmentratio_mean[main_combined$ParentGlobalID=="{9F61EDAB-4D5C-40D0-8382-EF39C19D1310}"]<-NA_real_
+#OHNE9125_B
+main_combined$ChannelDimensions_score[main_combined$ParentGlobalID=="b4ea0ed9-7aeb-470a-a8a9-558846a1052a"]<-1.5
+main_combined$ChannelDimensions_method[main_combined$ParentGlobalID=="b4ea0ed9-7aeb-470a-a8a9-558846a1052a"]<-"Estimated from photos, other visits"
+main_combined$fp_entrenchmentratio_mean[main_combined$ParentGlobalID=="b4ea0ed9-7aeb-470a-a8a9-558846a1052a"]<-2
+#OHNE9126_B
+main_combined$ChannelDimensions_score[main_combined$ParentGlobalID=="423ae7ca-8dad-4ff1-8a8c-c88472a4c7af"]<-1.5
+main_combined$ChannelDimensions_method[main_combined$ParentGlobalID=="423ae7ca-8dad-4ff1-8a8c-c88472a4c7af"]<-"Estimated from photos, other visits"
+main_combined$fp_entrenchmentratio_mean[main_combined$ParentGlobalID=="423ae7ca-8dad-4ff1-8a8c-c88472a4c7af"]<-2
 
-main_df %>%
-  select(Database, ParentGlobalID, SiteCode, Lat_field, Long_field) %>%
-  filter(Long_field< -120 & Lat_field<35) %>%
-  as.data.frame()
-main_df %>% filter(SiteCode=="CAWM0621")  %>% as.data.frame()
-
-western_sites_classes_sf %>%
-  filter(Region_detail=="AW" & State=="CA" & Class=="E")
 
 
-western_sites_classes_sf[which.max(western_sites_classes_sf$Long_field),]
+#### XWALK to "true" determinations ####
+names(main_combined)
+nese_determinations<-read_csv("NESEbetaclass_10062022.csv") %>%
+  select(SiteCode=Site.Code,
+         Instrument_Single=`Instrum/Single`,
+         Determination_final=Class)
+xwalk<-read_csv("xwalk_nese_step0.csv") %>%
+  filter(Usability=="OK") %>%
+  left_join(nese_determinations) %>%
+  mutate(Determination_final=case_when(Determination_final=="Perennial"~"P",
+                                       Determination_final=="Intermittent"~"I",
+                                       Determination_final=="Ephemeral"~"E",
+                                       is.na(Determination_final)~"U",
+                                       T~"U"))
+
+xwalk %>%
+  select(SiteCode, REGION, Determination_final) %>%
+  unique() %>%
+  group_by(REGION, Determination_final) %>% tally() %>%
+  pivot_wider(names_from=Determination_final, values_from =n )
+
 #####
-skim_without_charts(main_df)
-main_df %>%
-  filter(is.na(Lat_field)) %>%
-  select(Database, ParentGlobalID, SiteCode, Lat_field, Long_field)
+#AMPHIBIANS
+amphib_df<-read_csv("https://sdamchecker.sccwrp.org/checker/download/amphibians-all") %>%
+  filter(origin_database %in% myDBs) %>%
+  transmute(
+    Download_date = Sys.time(),
+    Database=origin_database,
+    ParentGlobalID = parentglobalid,
+    AmphibGlobalID=globalid,
+    SiteCode = am_sitecode, 
+    Amphib_Species=amphibians_taxon, 
+    Amphib_LifeStage=amphibians_lifestage, 
+    Amphib_Abundance=amphibians_abundance, 
+    Amphib_Notes=amphibians_notes
+  )
+amphib_combined<-amphib_df 
 
-main_df %>% filter(SiteCode=="NOT RECORDED") %>% 
-  as.data.frame()
-
-main_df %>%
-  filter(SiteCode=="CAAW0394") %>%
-  select(SiteName)
-
-main_df %>%
-  filter(is.na(UplandRootedPlants_score)) %>%
-  select(Database, SiteCode, CollectionDate, UplandRootedPlants_score, UplandRootedPlants_notes)
-
-############################
-
-#Veg data
-
+#### HYDROVEG - Rename columns and filter for GP data in hydroveg dataset ####
 hydroveg_df<- 
   read_csv("https://sdamchecker.sccwrp.org/checker/download/hydroveg-all") %>%
   filter(origin_database %in% myDBs) %>%
@@ -354,7 +384,6 @@ hydroveg_df<-
   )
 
 # Manual changes to vegetation data
-hydroveg_df$Plant_Status %>% unique()
 
 veg_combined <- hydroveg_df %>%
   mutate(Plant_Species = str_trim(Plant_Species)) %>% # Remove carriage returns, leading white space and trailing white space
@@ -362,18 +391,17 @@ veg_combined <- hydroveg_df %>%
     Plant_Species %in% c("NR","?") ~ "No plant",
     T~Plant_Species
   )) %>%
-  mutate(
-    Plant_Status = case_when(
-      is.na(Plant_Status) == T ~ "nonhydrophyte",
-      T~ Plant_Status),
+  mutate(Plant_Status = case_when(
+    is.na(Plant_Status) == T ~ "nonhydrophyte",
+    T~ Plant_Status),
     Plant_flag = case_when(
       is.na(Plant_flag) == T ~ "no",
-      T~Plant_flag))
+      T~Plant_flag
+    ))
 
-###
-#AI data
-
-ai_df<-  read_csv("https://sdamchecker.sccwrp.org/checker/download/aquatic_invertebrates-all") %>%
+#### AQUATIC INVERTEBRATES ####
+ai_df<-
+  read_csv("https://sdamchecker.sccwrp.org/checker/download/aquatic_invertebrates-all") %>%
   filter(origin_database %in% myDBs) %>%
   transmute(
     Download_date = Sys.time(),
@@ -388,7 +416,7 @@ ai_df<-  read_csv("https://sdamchecker.sccwrp.org/checker/download/aquatic_inver
     AI_Notes= ai_notes) %>%
   filter(AI_Taxon != "Na" & AI_Taxon != "na" & !(is.na(AI_Taxon)))
 
-
+# CLEANING BASED ON CURRENT AND PRIOR DATASETS
 
 ai_combined <- ai_df %>%
   mutate(AI_Taxon = trimws(AI_Taxon,whitespace = "[ \t\r\n]")) %>% # Remove trailing and leading white spaces
@@ -846,8 +874,8 @@ ai_combined <- ai_df %>%
                          AI_Family %in% c("Corydalidae","Sialidae")~"Megaloptera",
                          AI_Family %in% c("LEPIDOPTERA")~"Lepidoptera",
                          T~"OtherOrder_OrderNotKnown"
-                         
-    ),
+                     
+                         ),
     #This code assigns families to appropriate groups to assist with metric calculation
     AI_Ephemeroptera = AI_Family %in% c("Ameletidae", "Baetidae","Baetiscidae", "Caenidae", "Ephemerellidae","Ephemeridae", "EPHEMEROPTERA", 
                                         "Heptageniidae", "Isonychiidae", "Leptohyphidae", "Leptophlebiidae", 
@@ -918,11 +946,91 @@ ai_combined <- ai_df %>%
                                    #Other insects where all taxa have TV > 8
                                    "Belostomatidae","Corixidae","Haliplidae"),
     AI_Tolerant_Alt = (AI_Noninsect  & !(AI_Bivalve|AI_Crayfish) |
-                         AI_Family %in% c("Culicidae","Chironomidae"))
-  )
+                        AI_Family %in% c("Culicidae","Chironomidae"))
+                                     )
+ai_combined %>% select(AI_Tolerant, AI_Tolerant_Alt, AI_Family) %>% unique() %>% filter(AI_Tolerant_Alt) %>%write.table("clipboard", sep="\t", row.names=F)
+ai_combined %>% filter(AI_Tolerant_Alt) %>%group_by(AI_Family) %>% tally() %>% arrange(n) %>%write.table("clipboard", sep="\t", row.names=F)
+ai_combined %>% group_by(AI_Order) %>% tally()
+ai_combined %>% filter(AI_Order=="OtherOrder_OrderNotKnown") %>% group_by(AI_Family) %>% tally()
+# 
+#   
 
-ai_combined %>%
-  filter(AI_Taxon2=="AI_Taxon") %>%
-  select(AI_Taxon) %>%
-  unique()
-  
+
+# MORE CLEANUP FOR AI DATA BASED ON BUG HABITAT TYPE (TERRESTRIAL, SEMI-AQUATIC)
+# This code may be used to drop terrestrial bugs and other taxa we want to exclude from analysis
+excluded_bugs<-c(
+  "Exclude","No invertebrates observed",
+  #Terrestrial
+  "Aphididae", "Aphrophoridae","Araneae","Arionidae","Arthropleidae","Braconidae",
+  "Chloropidae","Chrysididae","Chrysopidae","Cicadellidae","Cicadidae","Diplopoda",
+  "Diprionidae","Halictidae","Ithonidae","Limacidae","Lithobiidae","Lygaeidae","Meinertellidae",
+  "Melyridae","Miridae","Mycetophilidae","Pentatomidae","Ptiliidae","Salpingidae","Sciaridae","Stylommatophora",
+  "Zygentoma","Formicidae","Crabronidae","Thripidae","Coreidae","Vespidae","Noctuidae",
+  "Crambidae", "Hymenoptera","Oxychilidae","Syrphidae",
+  "Cyphoderinae",
+  "Oniscidae", # ADDED BY KSM DEC 22
+  "Oniscidea", # ADDED BY KSM DEC 22
+  "Terrestrial beetle", "Terrestrial beetle sp","Terrestrial snail",# ADDED BY KSM DEC 22
+  "Terrestrial sp", # Added 9/26 KSM
+  #Saline
+  "Canacidae", #Tidal flies
+  # "Mysidae", #Mysid shrimp
+  #Mosquitos
+  "Culicidae"
+)
+
+#Opt to exclude semi-aquatic, surface dwellers, etc
+semi_aquatic<-c(
+  #Beetles
+  "Carabidae", "Staphylinidae","Georissidae","Chrysomelidae", "Curculionidae",
+  #Hemiptera
+  "Veliidae", "Gerridae", "Mesoveliidae","Saldidae","Gelastocoridae","Macroveliidae",
+  #Other
+  "Talitridae"
+)
+
+# check_ai <- ai_combined %>%
+#   filter(AI_Family == "DOTHIS") %>%
+#   transmute(AI_Taxon, AI_Taxon2,Notes = paste("Changed taxon from ",AI_Taxon," (KSM)",sep = "")) %>%
+#   unique() %>%
+#   filter(!AI_Taxon2 %in% excluded_bugs) %>%
+#   filter(!AI_Taxon2 %in% semi_aquatic)
+# 
+# 
+# write_csv(check_ai, file = "NotForGit/clean_taxonomysamples.csv") 
+
+# Remove terrestrial bugs, semi-aquatic species and other non-insect species from AI taxonomy dataset
+ai_combined2<-ai_combined %>%
+  filter(!AI_Family %in% excluded_bugs) %>%
+  filter(!AI_Taxon2 %in% excluded_bugs) %>%
+  filter(!AI_Family %in% semi_aquatic) %>%
+  filter(!AI_Taxon2 %in% semi_aquatic)
+
+####
+# Logger data, if needed
+# logger_df<-  read_csv("https://sdamchecker.sccwrp.org/checker/download/logger_raw") %>%
+#   transmute(SiteCode = login_sitecode,
+#             PendantID = pendantid,
+#             LoggerNumber = login_loggernumber,
+#             StartDate = login_start,
+#             EndDate=login_end,
+#             DateTime=datetime,
+#             Temperature=temperature,
+#             Temp_units=temperature_units,
+#             Intensity=intensity,
+#             Intensity_units=intensity_units,
+#             TempC = case_when(Temp_units=="DegC"~Temperature,
+#                               Temp_units=="DegF"~(Temperature-32)*(5/9),
+#                               T~NA_real_),
+#             login_email = login_email
+#             )
+
+#### Write data to NotForGit folder ####
+write_csv(main_combined %>% inner_join(xwalk) %>% mutate(CalcTime=Sys.time()), file="NotForGit/1_Imported and cleaned data/main_step1.csv")
+write_csv(veg_combined %>% inner_join(xwalk) %>% mutate(CalcTime=Sys.time()), file="NotForGit/1_Imported and cleaned data/veg_step1.csv")
+write_csv(ai_combined2 %>% inner_join(xwalk) %>% mutate(CalcTime=Sys.time()), file="NotForGit/1_Imported and cleaned data/aquaticinvertebrates_step1.csv")
+write_csv(amphib_combined %>% inner_join(xwalk) %>% mutate(CalcTime=Sys.time()), file="NotForGit/1_Imported and cleaned data/amphibians_step1.csv")
+write_csv(xwalk %>% mutate(CalcTime=Sys.time()), file="NotForGit/1_Imported and cleaned data/xwalk_step1.csv")
+#write_csv(loggers_meta_combined2 %>% mutate(CalcTime=Sys.time()), file="NotForGit/1_Imported and cleaned data/loggers_meta_combined_step1.csv")
+#write_csv(logger_data %>% mutate(CalcTime=Sys.time()), file="NotForGit/1_Imported and cleaned data/loggers_readings_combined_step1.csv")
+#
