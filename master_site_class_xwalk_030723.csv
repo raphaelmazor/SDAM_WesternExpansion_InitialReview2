@@ -80,7 +80,7 @@ AZWM0122,P,WM,West,
 AZWM0123,I,WM,West,
 AZWM0124,P,WM,West,
 AZWM1588,E,WM,West,
-AZWM1589,U,WM,West,Review more closely. Longest flow is ~25 days but there are a lot of them back to back. Tentative E
+AZWM1589,E,WM,West,"Q&D review of logger data, plus review by PDT"
 AZWM1590,E,WM,West,
 AZWM1591,E,WM,West,
 AZWM1834,I,WM,West,Q&D Interpretation of logger data and field observations of drying
@@ -467,7 +467,7 @@ MSSE9550_B,E,SE,East,
 MSSE9555_V,E,SE,East,
 MSSE9556_V,E,SE,East,
 MSSE9557_V,P,SE,East,
-MTAW9190,U,AW,West,Looks E but data are missing for a big chunk in Spring
+MTAW9190,U,AW,West,"Loggers have a gap from late March to Late June, which is the rainiest period. Unable to distinguish between I and E. Reject."
 MTAW9191,E,AW,West,Lots of blips but all fairly low
 MTAW9192,E,AW,West,Q&D interpretation of logger data
 MTNB14,E,GP_N,GP,
@@ -619,7 +619,7 @@ NMWM9055,E,WM,West,Q&D review of logger data
 NMWM9063,E,WM,West,Q&D review of logger data
 NVAW1179,P,AW,West,"L1 shows drying, but L2 does not, nor does USGS gage"
 NVAW1182,I,AW,West,Q&D review of logger and gage data
-NVAW1187,U,AW,West,"Loggers suggest E, as do recent gage records. But older records suggest intermittent"
+NVAW1187,I,AW,West,"Review of gage data, which is much longer than logger data (which suggests E)"
 NVAW1190,I,AW,West,
 NVAW1191,I,AW,West,
 NVAW1193,P,AW,West,
