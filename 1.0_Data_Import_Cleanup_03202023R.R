@@ -4,6 +4,15 @@ library(lubridate)
 library(skimr)
 
 ##### METHOD DEVELOPMENT SITES - Read in site data for methods development sites ####
+western_sites_classes<-read_csv("master_site_class_xwalk_030723.csv") %>%
+  filter(Region=="West") %>%
+  mutate(State=str_sub(SiteCode, 1,2))
+
+western_sites_classes %>%
+  group_by(Region_detail, Class) %>%
+  tally() %>%
+  pivot_wider(names_from=Region_detail, values_from = n)
+
 
 #Identify WESTERN databases
 myDBs<-c("WMBR_1_1","WEx_SDAM_0","WMBR_2","WMV_1","FD003","FD004") 

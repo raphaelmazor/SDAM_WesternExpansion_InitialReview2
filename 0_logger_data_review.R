@@ -279,16 +279,16 @@ my_logger_df2<-my_logger_df %>%
                          intensity <= cutoff~"Dry",
                          T~"Other"  )
   ) %>%
-
-    #
+  
+  #
   # group_by(PendantID, CollectionDate, cutoff, LoggerLocation) %>%
   # summarise(PctWet=sum(Wet=="Wet")/length(Wet)) %>%
   # ungroup() %>%
   #
   arrange(datetime) #%>%
-  # select(datetime, Date, intensity, Wet, PendantID, LoggerLocation, cutoff, temperature) %>%
-  # pivot_longer(cols=c(intensity, temperature)) %>%
-  # mutate(cutoff =case_when(name=="intensity"~cutoff, T~32))
+# select(datetime, Date, intensity, Wet, PendantID, LoggerLocation, cutoff, temperature) %>%
+# pivot_longer(cols=c(intensity, temperature)) %>%
+# mutate(cutoff =case_when(name=="intensity"~cutoff, T~32))
 
 my_logger_df2 %>% group_by((Wet)) %>% tally()
 sum(my_logger_df2$Wet=="Wet")/length(my_logger_df2$Wet)
@@ -310,7 +310,7 @@ max(my_logger_df2$Date) - min(my_logger_df2$Date)
 # # xlim(as_datetime("2021-12-01 01:00:00"),
 # as_datetime("2022-12-31 23:00:00"))
 
-  # facet_grid(name~LoggerLocation, scales="free_y")
+# facet_grid(name~LoggerLocation, scales="free_y")
 
 ggplot(data=my_logger_df2, aes(x=datetime, y=intensity))+
   geom_point(aes(color=Wet, shape=PendantID %>% as.character()))+
@@ -324,8 +324,8 @@ ggplot(data=my_logger_df2, aes(x=datetime, y=intensity))+
   scale_y_sqrt()+
   # scale_y_log10()+
   facet_wrap(~LoggerLocation, ncol=1)
-  # facet_grid(PendantID~LoggerLocation)
-  # facet_wrap(~PendantID, ncol=1)
+# facet_grid(PendantID~LoggerLocation)
+# facet_wrap(~PendantID, ncol=1)
 
 my_logger_metadata$SiteName
 my_logger_metadata %>% select(LoggerLocation, Lat_field, Long_field,CollectionDate,hydro_conditions, SurfaceFlow_pct, WaterInChannel_score, WaterInChannel_notes) %>% 
@@ -361,7 +361,7 @@ logger_duration_metrics<-logger_data_trim_daily_rle.df %>%
 logger_duration_metrics
 
 # logger_data_trim_daily_rle.df %>%
-  # filter(LoggerLocation=="L1")
+# filter(LoggerLocation=="L1")
 ####ADD TEMP
 
 my_logger_df3<-my_logger_df2 %>%
@@ -389,7 +389,7 @@ my_logger_df3 %>%
       datetime <= "2022-10-05 23:59:59" 
   ) %>% filter(LoggerLocation=="L1") %>%
   summary()
-  ggplot( aes(x=datetime, y=value))+
+ggplot( aes(x=datetime, y=value))+
   geom_point(aes(color=Wet, shape=PendantID %>% as.character()))+
   geom_path(aes(group=PendantID %>% as.character()))+
   geom_hline(data= . %>%
@@ -401,18 +401,30 @@ my_logger_df3 %>%
   scale_shape_discrete(name="PendantID")+
   ggtitle(my_site)+
   facet_grid(name~LoggerLocation, scales="free_y")
-  
+
 
 # # xlim(as_datetime("2021-12-01 01:00:00"),
 # as_datetime("2022-12-31 23:00:00"))
-  
-  main_df %>% 
-    left_join(western_sites_classes) %>%
-    group_by(Class, SiteCode) %>% 
-    tally() %>%
-    ggplot()+geom_histogram(aes(x=n, fill=Class))+
-    scale_x_binned()
 
+main_df %>% 
+  left_join(western_sites_classes) %>%
+  mutate(Class= case_when(is.na(Class)~"U",
+                          T~Class)) %>%
+  group_by(Class, SiteCode) %>% 
+  tally() %>%
+  ggplot()+geom_histogram(aes(x=n, fill=Class))+
+  scale_x_binned()
+
+main_df %>% 
+  left_join(western_sites_classes) %>%
+  mutate(Class= case_when(is.na(Class)~"U",
+                          T~Class)) %>%
+  group_by(SiteCode) %>% 
+  tally() %>%
+  group_by(n) %>%
+  tally() %>%
+  write.table(file="clipboard",sep="\t", row.names=F)
+  
 ########USGS Gage Data########
 
 library(dataRetrieval) #USGS data retrieval package
