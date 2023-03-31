@@ -213,7 +213,7 @@ logger_cal<-read_csv("https://sdamchecker.sccwrp.org/checker/download/calibratio
 logger_cal %>% group_by(serialnumber) %>% tally() %>% filter(n>1) #Verify that no pendant ID shows up more than once
 
 #Pick a site of interest
-my_site<-"TXAW9255"
+my_site<-"CAAW0243"
 
 #Get logger metadata
 my_logger_metadata<-main_df %>%
@@ -250,7 +250,8 @@ my_logger_metadata %>% select(contains("pendant"))
 
 main_df %>% 
   filter(SiteCode == my_site) %>%
-  select(Database, CollectionDate, WaterInChannel_score, WaterInChannel_notes, SurfaceFlow_pct, SurfaceSubsurfaceFlow_pct, IsolatedPools_number)
+  select(Database, CollectionDate, WaterInChannel_score, WaterInChannel_notes, SurfaceFlow_pct, SurfaceSubsurfaceFlow_pct, IsolatedPools_number) %>%
+  arrange(CollectionDate)
 main_df %>% 
   filter(SiteCode == my_site) %>%
   select(Database, CollectionDate, Lat_field, Long_field) %>% as.data.frame()
@@ -323,8 +324,8 @@ ggplot(data=my_logger_df2, aes(x=datetime, y=intensity))+
   ggtitle(my_site)+
   scale_y_sqrt()+
   # scale_y_log10()+
-  facet_wrap(~LoggerLocation, ncol=1)
-# facet_grid(PendantID~LoggerLocation)
+  # facet_wrap(~LoggerLocation, ncol=1)
+facet_grid(PendantID~LoggerLocation)
 # facet_wrap(~PendantID, ncol=1)
 
 my_logger_metadata$SiteName
@@ -430,7 +431,7 @@ main_df %>%
 library(dataRetrieval) #USGS data retrieval package
 # mysite<-"CAAW0260"
 my_logger_metadata$SiteName
-mygaugeid<-"08281400"
+mygaugeid<-"11255575"
 gauge_name<- readNWISsite(mygaugeid)$station_nm
 gauge_name
 parameterCd <- "00060" #This is the parameter code for discharge
@@ -461,6 +462,7 @@ ggplot(data=my_gage_data, aes(x=Date, y=Result))+
   geom_rug(sides="b")+
   # facet_wrap(~Source, scales="free", ncol=1)+
   xlab("")+ylab("")+
+  geom_vline(xintercept=ymd(c("2021-12-20", "2022-03-20","2023-02-10")), color="orange")+
   ggtitle(gauge_name, subtitle = mygaugeid)
 
 

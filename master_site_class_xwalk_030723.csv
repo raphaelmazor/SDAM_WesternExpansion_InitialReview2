@@ -175,7 +175,7 @@ CAWM1900,E,WM,West,
 CAWM1902,E,WM,West,
 CAWM9002,U,WM,West,"Need more logger data. Dry periods evident, but does not match across loggers, nor match field observations. Could be I or P"
 CAWM9005,U,WM,West,Likely E but record is too short
-CAWM9007,U,WM,West,Record too short.
+CAWM9007,U,WM,West,L1 only has data from one period. L2 was deployed at visit 2 but overlooked during visit 3. Could still be out there.
 CAWM9008,U,WM,West,Possibly E but record too short
 COAW0746,E,AW,West,
 COAW0751,I,AW,West,
