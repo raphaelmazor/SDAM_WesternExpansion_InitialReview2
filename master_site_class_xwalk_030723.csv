@@ -127,7 +127,7 @@ CAAW0438,U,AW,West,"Alt Cole Creek site, no logger data?"
 CAAW0440,I,AW,West,Q&D review of gage data
 CAAW0441,I,AW,West,Q&D Review of logger data
 CAAW0449,I,AW,West,Short record but sufficient for determining intermittency
-CAAW0454,U,AW,West,37 days of flow. Borderline I?
+CAAW0454,E,AW,West,Manual inspection shows 34 continuous days of flow
 CAAW0473,E,AW,West,Q&D review of logger data
 CAAW9243,I,AW,West,Short record but sufficient for determining intermittency
 CAAW9247,P,AW,West,Q&D Review of logger data; short record but site is well known
@@ -162,7 +162,7 @@ CAWM0724,P,WM,West,
 CAWM0736,I,WM,West,
 CAWM1822,I,WM,West,
 CAWM1831,I,WM,West,
-CAWM1837,U,WM,West,No logger data available
+CAWM1837,I,WM,West,"Some logger data available. Cutoff too high, but pattern clearly supports intermittent"
 CAWM1871,E,WM,West,
 CAWM1882,I,WM,West,
 CAWM1891,E,WM,West,
@@ -173,10 +173,10 @@ CAWM1898,E,WM,West,
 CAWM1899,E,WM,West,
 CAWM1900,E,WM,West,
 CAWM1902,E,WM,West,
-CAWM9002,U,WM,West,"Need more logger data. Dry periods evident, but does not match across loggers, nor match field observations. Could be I or P"
-CAWM9005,U,WM,West,Likely E but record is too short
-CAWM9007,U,WM,West,L1 only has data from one period. L2 was deployed at visit 2 but overlooked during visit 3. Could still be out there.
-CAWM9008,U,WM,West,Possibly E but record too short
+CAWM9002,I,WM,West,Clear spring dry period that doesn't correspond to frozen.
+CAWM9005,E,WM,West,Confirmd by one logger
+CAWM9007,I,WM,West,"Short logger records show continuous surface water, but site never had 100% surface flow at any site visit"
+CAWM9008,I,WM,West,Record long enough to show intermttent flow of a few months in spring
 COAW0746,E,AW,West,
 COAW0751,I,AW,West,
 COAW0755,I,AW,West,Q&D Interpretation of logger data
@@ -185,7 +185,7 @@ COAW0765,I,AW,West,
 COAW0767,E,AW,West,
 COAW0775,E,AW,West,
 COAW0777,E,AW,West,
-COAW0781,U,AW,West,No logger data available
+COAW0781,U,AW,West,"REJECT. No logger data available. Lindsey Reynolds site, but missed coordinates. No independent classification info?"
 COAW0782,E,AW,West,
 COAW0785,P,AW,West,
 COAW0786,P,AW,West,Q&D Interpretation of logger data
@@ -199,7 +199,7 @@ COAW1449,I,AW,West,Q&D Interpretation of logger data
 COAW1539,I,AW,West,Q&D review of logger data
 COAW9104,E,AW,West,Q&D Interpretation of logger data
 COAW9110,E,AW,West,Q&D Interpretation of logger data
-COAW9111,U,AW,West,Looks E but data are missing for a big chunk in Spring
+COAW9111,U,AW,West,Looks E but data are missing for a big chunk in Spring. No APT possible. Weather during gap is dry but not rain-free. Referrred to PDT
 COCB1,P,GP_C,GP,
 COCB120,U,GP_C,GP,
 COCB121,P,GP_C,GP,
@@ -467,7 +467,7 @@ MSSE9550_B,E,SE,East,
 MSSE9555_V,E,SE,East,
 MSSE9556_V,E,SE,East,
 MSSE9557_V,P,SE,East,
-MTAW9190,U,AW,West,"Loggers have a gap from late March to Late June, which is the rainiest period. Unable to distinguish between I and E. Reject."
+MTAW9190,U,AW,West,"Loggers have a gap from late March to Late June, which is the rainiest period. Unable to distinguish between I and E. Likely reject, referred to PDT"
 MTAW9191,E,AW,West,Lots of blips but all fairly low
 MTAW9192,E,AW,West,Q&D interpretation of logger data
 MTNB14,E,GP_N,GP,
@@ -582,7 +582,7 @@ NMAW9036,P,AW,West,"Despite L1 giving many dry readings, L2 is consistently wet.
 NMAW9037,E,AW,West,Q&D review of logger data
 NMAW9043,E,AW,West,Q&D review of logger data
 NMAW9044,I,AW,West,Q&D review of logger data
-NMAW9045,U,AW,West,Can't tell from logger or photos. Reject? I or E.
+NMAW9045,U,AW,West,Can't tell from logger or photos. Reject? I or E. Deferred to PDT and asked field crew for their insights
 NMCB33,I,GP_C,GP,
 NMCB34,I,GP_C,GP,
 NMCB35,P,GP_C,GP,
@@ -819,7 +819,7 @@ TXAW9199,I,AW,West,Q&D inspection of logger data
 TXAW9251,I,AW,West,Q&D inspection of logger data
 TXAW9253,E,AW,West,Q&D inspection of logger data
 TXAW9254,E,AW,West,Q&D inspection of logger data
-TXAW9255,U,AW,West,E or I. Very low intensity wet period could be false signal
+TXAW9255,E,AW,West,Q&D inspection of logger data
 TXAW9256,E,AW,West,Q&D inspection of logger data
 TXAW9273,I,AW,West,Q&D inspection of logger data
 TXAW9276,E,AW,West,Q&D inspection of logger data
@@ -1015,12 +1015,12 @@ WVNE9104_B,I,NE,East,
 WVNE9105_B,E,NE,East,
 WVNE9106_B,P,NE,East,
 WYAW0753,E,AW,West,
-WYAW1471,U,AW,West,"L2 was noted as being above the sediment. Half the record is missing, but gage supports P? Gage misses low flows"
+WYAW1471,P,AW,West,"L2 was noted as being above the sediment. Half the record is missing, but gage supports P? Gage misses low flows"
 WYAW1472,I,AW,West,
 WYAW1473,P,AW,West,Q&D Interpretation of logger data
 WYAW1474,I,AW,West,
 WYAW1476,I,AW,West,
-WYAW1477,U,AW,West,Likely P due to L1 being placed near bank
+WYAW1477,P,AW,West,Likely P due to L1 being placed near bank. Nearby gage suggests perennial
 WYAW1481,P,AW,West,Q&D Interpretation of logger data
 WYAW9130,E,AW,West,Q&D Interpretation of logger data
 WYAW9131,E,AW,West,Q&D Interpretation of logger data
@@ -1067,6 +1067,7 @@ WYWM1915,I,WM,West,
 WYWM1916,I,WM,West,
 WYWM9146,I,WM,West,"Review more closely. Longest flow is ~44, so borderline I."
 WYWM9147,I,WM,West,Q&D Interpretation of logger data
-WYWM9148,U,WM,West,"Review. Could be P or I. Some dry periods indicated in both loggers, but may not match field observations"
+WYWM9148,P,WM,West,Q&D inspection of logger data. Loggers show brief dry periods but they don't match field observations. We suspect this is due to logger being deployed above the surface
 WYWM9154,P,WM,West,"Review. Could be P or I. Some dry periods indicated in L1, but none in L2. Field observations show wet conditions on those days"
 WYWM9155,I,WM,West,Q&D Interpretation of logger data
+CAWM9006,U,WM,West,

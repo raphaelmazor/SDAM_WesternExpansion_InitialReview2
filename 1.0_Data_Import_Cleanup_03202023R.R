@@ -11,7 +11,7 @@ western_sites_classes<-read_csv("master_site_class_xwalk_030723.csv") %>%
 western_sites_classes %>%
   group_by(Region_detail, Class) %>%
   tally() %>%
-  pivot_wider(names_from=Region_detail, values_from = n)
+  pivot_wider(names_from=Region_detail, values_from = n, values_fill = 0)
 
 
 #Identify WESTERN databases
@@ -23,8 +23,7 @@ junk_west<-junk %>% filter(origin_database %in% myDBs)
 junk_east<-junk %>% filter(origin_database %in% c("NESE Baseline Revisits v2", "NESE Baseline v1", "NESE Validation v1"))
 junk_gp<-junk %>% filter(origin_database %in% c("Great Plains Baseline Revisits v2_1_October","Great Plains SDAM v3","Great Plains Validation_v2")) #Missing GP revisits v3
 
-main_df<- junk %>%
-  filter(origin_database %in% myDBs) %>%
+main_df<- junk_west %>%
   transmute( # Align column names to original metric calculator script naming
     Download_date = Sys.time(),
     Database= origin_database,
@@ -212,13 +211,26 @@ main_df<- junk %>%
   ungroup() %>%
   #Excluded sites
   filter(SiteCode!="NOT RECORDED") %>%
-  filter(!SiteCode %in% c("NVAW1193",
-                          "NVAW1190",
-                          "COAW0781",
-                          "CAAW0247")) 
+  filter(!SiteCode %in% c("NVAW1193", #Lots of missing data
+                          "NVAW1190", #Lots of missing data
+                          "COAW0781", #A few missing data, but can't verify true streamflow duration
+                          "CAAW0247")) %>% #Missing plant and bug data 
+  left_join(western_sites_classes %>%
+              select(SiteCode, Determination_Final=Class, ClassificationNotes=Note, Region_detail))
 
+main_df %>%
+  filter(is.na(Region_detail)) %>%
+  select(SiteCode)
 
+main_df %>%
+  select(SiteCode, Determination_Final,Region_detail) %>%
+  unique() %>%
+  group_by(Region_detail, Determination_Final) %>%
+  tally() %>%
+  pivot_wi
 
+main_df %>%filter(SiteCode =="CAAW0247") %>%
+  write.table(file="clipboard",sep="\t", row.names=F)
 
 
 ###############################################

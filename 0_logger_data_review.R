@@ -213,7 +213,7 @@ logger_cal<-read_csv("https://sdamchecker.sccwrp.org/checker/download/calibratio
 logger_cal %>% group_by(serialnumber) %>% tally() %>% filter(n>1) #Verify that no pendant ID shows up more than once
 
 #Pick a site of interest
-my_site<-"CAAW0243"
+my_site<-"CAWM9006"
 
 #Get logger metadata
 my_logger_metadata<-main_df %>%
@@ -269,7 +269,8 @@ my_logger_df2<-my_logger_df %>%
   rename(PendantID=login_pendantid) %>%
   mutate(Date = datetime %>% as_date()
   ) %>%
-  
+  mutate(intensity = case_when(intensity_units=="Lux"~intensity*.0929, #Sometimes data submitted as lux
+                               T~intensity)) %>%
   mutate(Date = datetime %>% as_date(),
          temperature = case_when(temperature_units=="DegC"~temperature,
                                  T~((temperature-32)*(5/9)))) %>%
@@ -324,8 +325,8 @@ ggplot(data=my_logger_df2, aes(x=datetime, y=intensity))+
   ggtitle(my_site)+
   scale_y_sqrt()+
   # scale_y_log10()+
-  # facet_wrap(~LoggerLocation, ncol=1)
-facet_grid(PendantID~LoggerLocation)
+  facet_wrap(~LoggerLocation, ncol=1)
+# facet_grid(PendantID~LoggerLocation)
 # facet_wrap(~PendantID, ncol=1)
 
 my_logger_metadata$SiteName
@@ -383,6 +384,10 @@ ggplot(data=my_logger_df3, aes(x=datetime, y=value))+
   scale_shape_discrete(name="PendantID")+
   ggtitle(my_site)+
   facet_grid(name~LoggerLocation, scales="free_y")#+
+  coord_cartesian(xlim=c(
+    min(c(my_logger_df3$datetime,my_logger_metadata$CollectionDate )),
+    max(c(my_logger_df3$datetime,my_logger_metadata$CollectionDate ))
+  ))
 
 my_logger_df3 %>%
   filter(
@@ -431,7 +436,7 @@ main_df %>%
 library(dataRetrieval) #USGS data retrieval package
 # mysite<-"CAAW0260"
 my_logger_metadata$SiteName
-mygaugeid<-"11255575"
+mygaugeid<-"06628900"
 gauge_name<- readNWISsite(mygaugeid)$station_nm
 gauge_name
 parameterCd <- "00060" #This is the parameter code for discharge
