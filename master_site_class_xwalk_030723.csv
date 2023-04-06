@@ -1070,4 +1070,3 @@ WYWM9147,I,WM,West,Q&D Interpretation of logger data
 WYWM9148,P,WM,West,Q&D inspection of logger data. Loggers show brief dry periods but they don't match field observations. We suspect this is due to logger being deployed above the surface
 WYWM9154,P,WM,West,"Review. Could be P or I. Some dry periods indicated in L1, but none in L2. Field observations show wet conditions on those days"
 WYWM9155,I,WM,West,Q&D Interpretation of logger data
-CAWM9006,U,WM,West,
