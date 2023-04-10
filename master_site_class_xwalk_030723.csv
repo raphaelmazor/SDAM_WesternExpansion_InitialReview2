@@ -95,7 +95,7 @@ AZWM1855,I,WM,West,
 AZWM1866,E,WM,West,Q&D review of logger data. Longest wet is 35 days (borderline I)
 AZWM1867,E,WM,West,
 CAAW0242,P,AW,West,
-CAAW0243,I,AW,West,Short record but sufficient for determining intermittency. Gage confirms intermittency
+CAAW0243,E,AW,West,"Long term gage suggests ephemeral, even though study period was much wetter"
 CAAW0244,I,AW,West,
 CAAW0247,P,AW,West,
 CAAW0249,P,AW,West,
@@ -582,7 +582,7 @@ NMAW9036,P,AW,West,"Despite L1 giving many dry readings, L2 is consistently wet.
 NMAW9037,E,AW,West,Q&D review of logger data
 NMAW9043,E,AW,West,Q&D review of logger data
 NMAW9044,I,AW,West,Q&D review of logger data
-NMAW9045,U,AW,West,Can't tell from logger or photos. Reject? I or E. Deferred to PDT and asked field crew for their insights
+NMAW9045,U,AW,West,Can't tell from logger or photos. Reject.
 NMCB33,I,GP_C,GP,
 NMCB34,I,GP_C,GP,
 NMCB35,P,GP_C,GP,
