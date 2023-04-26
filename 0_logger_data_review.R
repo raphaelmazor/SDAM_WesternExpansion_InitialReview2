@@ -488,3 +488,23 @@ my_gage_data_rle_metrics<-my_gage_data_rle %>%
             LongestDry=max(Length[Value=="Dry"], na.rm=T),
   )
 my_gage_data_rle_metrics
+
+###############
+library(rnoaa)
+
+#Take center
+lat_lon_df <- data.frame(id = "pw",
+                         lat = 60.690545,
+                         lon = -147.097055)
+
+# find 10 closest monitors to  Prince William
+mon_near_pw <- 
+  meteo_nearby_stations(
+    lat_lon_df = lat_lon_df,
+    lat_colname = "lat",
+    lon_colname = "lon",
+    var = "PRCP",
+    year_min = 2011,
+    year_max = 2020,
+    limit = 10,
+  )
