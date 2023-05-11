@@ -18,7 +18,7 @@ myDBs<-c("WMBR_1_1","WEx_SDAM_0","WMBR_2","WMV_1","FD003","FD004")
 # junk<-read_csv("https://sdamchecker.sccwrp.org/checker/download/main-all") 
 #### MAIN - Read in main site data table and filter for Western sites ####
 main_df<- read_csv("https://sdamchecker.sccwrp.org/checker/download/main-all") %>%
-  filter(origin_database %in% myDBs) %>%
+  # filter(origin_database %in% myDBs) %>%
   transmute( # Align column names to original metric calculator script naming
     Download_date = Sys.time(),
     Database= origin_database,
@@ -213,7 +213,7 @@ logger_cal<-read_csv("https://sdamchecker.sccwrp.org/checker/download/calibratio
 logger_cal %>% group_by(serialnumber) %>% tally() %>% filter(n>1) #Verify that no pendant ID shows up more than once
 
 #Pick a site of interest
-my_site<-"WYWM9148"
+my_site<-"NDUB9"
 
 #Get logger metadata
 my_logger_metadata<-main_df %>%
